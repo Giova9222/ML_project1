@@ -101,9 +101,19 @@ def ridge_regression(y, tx, lambda_ ):
     regfact=tx.shape[0]*2*lambda_*np.eye(tx.shape[1])
     return np.linalg.solve(tx.T@tx+regfact,tx.T@y)
 
+def logistic_regression(y, tx, initial_w, max_iters, gamma):
+    w = initial_w
+    for i in range(max_iters):
+        z = tx@w
+        sigma = 1/(1 + np.exp(-z))
+        gradient = tx.T@(sigma - y)/len(y)
+        w = w - gamma*gradient
+    z_final = tx@w
+    sigma_final = 1/(1 + np.exp(-z_final))
+    eps = 1e-15
+    sigma_final = np.clip(sigma_final, eps, 1 - eps)
+    final_loss = -np.sum(y*np.log(sigma_final) + (1-y)*np.log(1-sigma_final))/len(y)
+    return (w, final_loss)
 
-
-
-
-
-
+def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    return
