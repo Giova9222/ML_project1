@@ -116,4 +116,15 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     return (w, final_loss)
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
-    return
+    w = initial_w
+    for i in range(max_iters):
+        z = tx@w
+        sigma = 1/(1 + np.exp(-z))
+        gradient = tx.T@(sigma - y)/len(y) + lambda_*w
+        w = w - gamma*gradient
+    z_final = tx@w
+    sigma_final = 1/(1 + np.exp(-z_final))
+    eps = 1e-15
+    sigma_final = np.clip(sigma_final, eps, 1 - eps)
+    final_loss = -np.sum(y*np.log(sigma_final) + (1-y)*np.log(1-sigma_final))/len(y) + lambda_/2*np.sum(w**2)
+    return (w, final_loss)
