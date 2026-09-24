@@ -127,7 +127,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     w = initial_w
     for i in range(max_iters):
         z = tx@w
-        sigma = 1/(1 + np.exp(-z))
+        sigma = np.exp(-np.logaddexp(0, -z))
         gradient = tx.T@(sigma - y)/len(y)
         w = w - gamma*gradient
     z_final = tx@w
@@ -141,8 +141,8 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     w = initial_w
     for i in range(max_iters):
         z = tx@w
-        sigma = 1/(1 + np.exp(-z))
-        gradient = tx.T@(sigma - y)/len(y) + lambda_*w
+        sigma = np.exp(-np.logaddexp(0, -z))
+        gradient = tx.T@(sigma - y)/len(y) + 2*lambda_*w
         w = w - gamma*gradient
     z_final = tx@w
     final_loss = np.sum(np.logaddexp(0, z_final) - y * z_final) / len(y) 
