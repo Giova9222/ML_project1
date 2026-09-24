@@ -10,6 +10,9 @@ def compute_MSEloss(y,tx,w):
 
 
 def mean_squared_error_gd(y, tx, initial_w,max_iters, gamma):
+    """
+    HI
+    """
     w=initial_w
     counter=0
     while (counter<max_iters): #eventually implement early stopping by adding OR
@@ -84,6 +87,9 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
 
 
 def mean_squared_error_sgd(y,tx,initial_w,max_iters, gamma):
+    """
+    HI
+    """
     w=initial_w
     counter=0
     while(counter<max_iters):
@@ -94,14 +100,23 @@ def mean_squared_error_sgd(y,tx,initial_w,max_iters, gamma):
     return(w,final_loss)
 
 def least_squares(y, tx):
+    """
+    HI
+    """
     return np.linalg.solve(tx.T@tx,tx.T@y)
 
 
 def ridge_regression(y, tx, lambda_ ):
+    """
+    HI
+    """
     regfact=tx.shape[0]*2*lambda_*np.eye(tx.shape[1])
     return np.linalg.solve(tx.T@tx+regfact,tx.T@y)
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
+    """
+    HI
+    """
     w = initial_w
     for i in range(max_iters):
         z = tx@w
@@ -116,6 +131,9 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     return (w, final_loss)
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    """
+    HI
+    """
     w = initial_w
     for i in range(max_iters):
         z = tx@w
