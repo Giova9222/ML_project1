@@ -106,8 +106,8 @@ def least_squares(y, tx):
     """
     HI
     """
-    w=np.linalg.solve(tx.T @ tx, tx.T @ y)
-    final_loss=compute_MSEloss(y,tx,w)
+    w = np.linalg.solve(tx.T @ tx, tx.T @ y)
+    final_loss = compute_MSEloss(y, tx, w)
     return w, final_loss
 
 
@@ -116,10 +116,9 @@ def ridge_regression(y, tx, lambda_):
     HI
     """
     regfact = tx.shape[0] * 2 * lambda_ * np.eye(tx.shape[1])
-    w=np.linalg.solve(tx.T @ tx + regfact, tx.T @ y)
-    final_loss=compute_MSEloss(y,tx,w)
-    return w,final_loss
-
+    w = np.linalg.solve(tx.T @ tx + regfact, tx.T @ y)
+    final_loss = compute_MSEloss(y, tx, w)
+    return w, final_loss
 
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
@@ -150,7 +149,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     for i in range(max_iters):
         z = tx @ w
         sigma = 1 / (1 + np.exp(-z))
-        gradient = tx.T @ (sigma - y) / len(y) + 2*lambda_ * w
+        gradient = tx.T @ (sigma - y) / len(y) + 2 * lambda_ * w
         w = w - gamma * gradient
     z_final = tx @ w
     sigma_final = 1 / (1 + np.exp(-z_final))
