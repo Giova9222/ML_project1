@@ -150,7 +150,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     for i in range(max_iters):
         z = tx @ w
         sigma = 1 / (1 + np.exp(-z))
-        gradient = tx.T @ (sigma - y) / len(y) + lambda_ * w
+        gradient = tx.T @ (sigma - y) / len(y) + 2*lambda_ * w
         w = w - gamma * gradient
     z_final = tx @ w
     sigma_final = 1 / (1 + np.exp(-z_final))
