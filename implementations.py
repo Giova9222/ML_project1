@@ -17,7 +17,8 @@ def mean_squared_error_gd(y, tx, initial_w,max_iters, gamma):
     counter=0
     while (counter<max_iters): #eventually implement early stopping by adding OR
         counter+=1
-        w=w-gamma*compute_MSEgrad(y,tx,w)
+        grad,_=compute_MSEgrad(y,tx,w)
+        w=w-gamma*grad
     final_loss=compute_MSEloss(y,tx,w)
     return (w,final_loss)
     
@@ -95,7 +96,8 @@ def mean_squared_error_sgd(y,tx,initial_w,max_iters, gamma):
     while(counter<max_iters):
         for y_batch, tx_batch in batch_iter(y,tx,1,1):
             counter+=1
-            w=w-gamma*compute_MSEgrad(y_batch,tx_batch,w)
+            grad,_=compute_MSEgrad(y_batch,tx_batch,w)
+            w=w-gamma*grad
     final_loss=compute_MSEloss(y,tx,w)
     return(w,final_loss)
 
