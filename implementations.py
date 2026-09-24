@@ -1,27 +1,28 @@
 import numpy as np
 
-def compute_MSEgrad(y,tx,w):
-    err= y- tx.dot(w)
+
+def compute_MSEgrad(y, tx, w):
+    err = y - tx.dot(w)
     grad = -tx.T.dot(err) / len(err)
     return grad, err
 
-def compute_MSEloss(y,tx,w):
-    return np.sum((y-tx@w)**2)/(len(y)*2)
+
+def compute_MSEloss(y, tx, w):
+    return np.sum((y - tx @ w) ** 2) / (len(y) * 2)
 
 
-def mean_squared_error_gd(y, tx, initial_w,max_iters, gamma):
+def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
     """
     HI
     """
-    w=initial_w
-    counter=0
-    while (counter<max_iters): #eventually implement early stopping by adding OR
-        counter+=1
-        grad,_=compute_MSEgrad(y,tx,w)
-        w=w-gamma*grad
-    final_loss=compute_MSEloss(y,tx,w)
-    return (w,final_loss)
-    
+    w = initial_w
+    counter = 0
+    while counter < max_iters:  # eventually implement early stopping by adding OR
+        counter += 1
+        grad, _ = compute_MSEgrad(y, tx, w)
+        w = w - gamma * grad
+    final_loss = compute_MSEloss(y, tx, w)
+    return (w, final_loss)
 
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
@@ -86,34 +87,35 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
         yield y[start_index:end_index], tx[start_index:end_index]
 
 
-
-def mean_squared_error_sgd(y,tx,initial_w,max_iters, gamma):
+def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
     """
     HI
     """
-    w=initial_w
-    counter=0
-    while(counter<max_iters):
-        for y_batch, tx_batch in batch_iter(y,tx,1,1):
-            counter+=1
-            grad,_=compute_MSEgrad(y_batch,tx_batch,w)
-            w=w-gamma*grad
-    final_loss=compute_MSEloss(y,tx,w)
-    return(w,final_loss)
+    w = initial_w
+    counter = 0
+    while counter < max_iters:
+        for y_batch, tx_batch in batch_iter(y, tx, 1, 1):
+            counter += 1
+            grad, _ = compute_MSEgrad(y_batch, tx_batch, w)
+            w = w - gamma * grad
+    final_loss = compute_MSEloss(y, tx, w)
+    return (w, final_loss)
+
 
 def least_squares(y, tx):
     """
     HI
     """
-    return np.linalg.solve(tx.T@tx,tx.T@y)
+    return np.linalg.solve(tx.T @ tx, tx.T @ y)
 
 
-def ridge_regression(y, tx, lambda_ ):
+def ridge_regression(y, tx, lambda_):
     """
     HI
     """
-    regfact=tx.shape[0]*2*lambda_*np.eye(tx.shape[1])
-    return np.linalg.solve(tx.T@tx+regfact,tx.T@y)
+    regfact = tx.shape[0] * 2 * lambda_ * np.eye(tx.shape[1])
+    return np.linalg.solve(tx.T @ tx + regfact, tx.T @ y)
+
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """
@@ -121,16 +123,19 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """
     w = initial_w
     for i in range(max_iters):
-        z = tx@w
-        sigma = 1/(1 + np.exp(-z))
-        gradient = tx.T@(sigma - y)/len(y)
-        w = w - gamma*gradient
-    z_final = tx@w
-    sigma_final = 1/(1 + np.exp(-z_final))
+        z = tx @ w
+        sigma = 1 / (1 + np.exp(-z))
+        gradient = tx.T @ (sigma - y) / len(y)
+        w = w - gamma * gradient
+    z_final = tx @ w
+    sigma_final = 1 / (1 + np.exp(-z_final))
     eps = 1e-15
     sigma_final = np.clip(sigma_final, eps, 1 - eps)
-    final_loss = -np.sum(y*np.log(sigma_final) + (1-y)*np.log(1-sigma_final))/len(y)
+    final_loss = -np.sum(
+        y * np.log(sigma_final) + (1 - y) * np.log(1 - sigma_final)
+    ) / len(y)
     return (w, final_loss)
+
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     """
@@ -138,13 +143,15 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     """
     w = initial_w
     for i in range(max_iters):
-        z = tx@w
-        sigma = 1/(1 + np.exp(-z))
-        gradient = tx.T@(sigma - y)/len(y) + lambda_*w
-        w = w - gamma*gradient
-    z_final = tx@w
-    sigma_final = 1/(1 + np.exp(-z_final))
+        z = tx @ w
+        sigma = 1 / (1 + np.exp(-z))
+        gradient = tx.T @ (sigma - y) / len(y) + lambda_ * w
+        w = w - gamma * gradient
+    z_final = tx @ w
+    sigma_final = 1 / (1 + np.exp(-z_final))
     eps = 1e-15
     sigma_final = np.clip(sigma_final, eps, 1 - eps)
-    final_loss = -np.sum(y*np.log(sigma_final) + (1-y)*np.log(1-sigma_final))/len(y) + lambda_/2*np.sum(w**2)
+    final_loss = -np.sum(
+        y * np.log(sigma_final) + (1 - y) * np.log(1 - sigma_final)
+    ) / len(y) + lambda_ / 2 * np.sum(w**2)
     return (w, final_loss)
