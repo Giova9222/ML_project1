@@ -376,3 +376,18 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     z_final = tx @ w
     final_loss = np.sum(np.logaddexp(0, z_final) - y * z_final) / len(y)
     return (w, final_loss)
+
+def sigmoid(z):
+    return np.exp(-np.logaddexp(0, -z))
+
+def f1_score(y_true, y_pred):
+    tp = np.sum((y_true == 1) & (y_pred == 1))
+    fp = np.sum((y_true == 0) & (y_pred == 1))
+    fn = np.sum((y_true == 1) & (y_pred == 0))
+
+    if tp == 0:
+        return 0.0
+
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+    return 2 * precision * recall / (precision + recall)
