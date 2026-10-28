@@ -1,0 +1,98 @@
+\documentclass[10pt]{article}
+
+\usepackage[a4paper,margin=2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\title{Machine Learning Project 1}
+\author{Marco Valerio Marmo, Giovanni Nostro, Isaia Mossi \\ EPFL}
+\date{}
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+Cardiovascular diseases are among the leading causes of death worldwide.
+The goal of this project is to predict the presence of myocardial infarction or coronary heart disease (MICHD) from lifestyle and clinical variables contained in the BRFSS dataset.
+
+The dataset contains more than 300,000 samples and several hundred health-related features describing demographics, medical conditions and behavioral habits.
+The task is formulated as a binary classification problem.
+
+\section{Exploratory Data Analysis}
+
+The dataset originally contains 321 variables of mixed type, including both continuous and categorical features. A large proportion of variables correspond to questionnaire answers encoded as discrete categories.
+
+A train-validation split (80\%-20\%) was performed using a fixed random seed.
+The target distribution was highly imbalanced, with only approximately 8.8\% positive samples in both the training and validation sets.
+
+Exploratory analysis highlighted several expected risk factors. Older age groups were associated with a substantially higher prevalence of cardiovascular disease.
+Similarly, variables related to hypertension, stroke history and general health showed stronger correlations with the target than lifestyle variables such as smoking or alcohol consumption.
+
+\section{Data Preprocessing}
+
+The large number of categorical features required extensive preprocessing.
+
+Categorical variables were transformed using one-hot encoding in order to obtain a suitable representation for linear models. Missing values in numerical features were replaced by the median value computed on the training set.
+After imputation, numerical variables were standardized to zero mean and unit variance. Finally, an intercept term was added to all samples.
+
+Because one-hot encoding considerably increased the dimensionality of the data, additional feature selection was performed before training the final models.
+
+\section{Feature Selection}
+
+To reduce computational cost and remove redundant variables, we used an L1-regularized logistic regression model as a feature selection method.
+
+The objective of this step was not to maximize predictive performance but to identify informative variables. Features with coefficients whose absolute value was close to zero were discarded, while the remaining features were retained for subsequent experiments.
+
+This procedure reduced the final representation to approximately 418 features, including the intercept term.
+
+\section{Models}
+
+\subsection{Logistic Regression}
+
+Our main model was logistic regression optimized using batch gradient descent.
+The model outputs class probabilities and a classification threshold was selected on the validation set by maximizing the F1-score.
+
+Because the dataset is strongly imbalanced, the F1-score was preferred over accuracy as the primary evaluation metric.
+
+\subsection{Weighted Logistic Regression}
+
+To account for class imbalance, we also implemented a weighted logistic regression assigning larger weights to positive examples during training.
+An additional L2 regularization term was applied to improve stability.
+
+\subsection{Linear Support Vector Machine}
+
+Finally, we experimented with a linear Support Vector Machine trained through coordinate descent in the dual formulation. This model was included as an alternative linear classifier and compared against logistic regression.
+
+\section{Results}
+
+Table~\ref{tab:results} summarizes the performance obtained on the validation set.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lc}
+        \hline
+        Model & F1-score \\
+        \hline
+        Logistic Regression & 0.432 \\
+        Weighted Logistic Regression & 0.424 \\
+        Linear SVM & 0.358 \\
+        \hline
+    \end{tabular}
+    \caption{Validation performance of the tested models.}
+    \label{tab:results}
+\end{table}
+
+The standard logistic regression achieved the best overall performance.
+Although class weighting improved the importance assigned to minority-class samples, it did not lead to a higher validation F1-score.
+The linear SVM struggled with the highly imbalanced nature of the problem and tended to predict almost exclusively the majority class.
+
+\section{Conclusion}
+
+In this project we developed a complete machine learning pipeline for predicting cardiovascular disease risk.
+The most important improvements came from careful preprocessing, one-hot encoding of categorical variables and feature selection using L1 regularization.
+
+Among the evaluated models, logistic regression provided the best trade-off between predictive performance and computational efficiency, achieving a validation F1-score of approximately 0.43.
+Future improvements could include more advanced feature engineering, systematic hyperparameter optimization and cross-validation-based model selection.
+
+\end{document}
