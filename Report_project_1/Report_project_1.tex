@@ -1,10 +1,13 @@
-\documentclass[10pt]{article}
+\documentclass[10pt,a4paper,twocolumn]{article}
 
 \usepackage[a4paper,margin=2cm]{geometry}
 \usepackage{amsmath}
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float}
+
 \title{Machine Learning Project 1}
 \author{Marco Valerio Marmo, Giovanni Nostro, Isaia Mossi \\ EPFL}
 \date{}
@@ -21,13 +24,34 @@ The task is formulated as a binary classification problem.
 
 \section{Exploratory Data Analysis}
 
-The dataset originally contains 321 variables of mixed type, including both continuous and categorical features. A large proportion of variables correspond to questionnaire answers encoded as discrete categories.
+The dataset contains 321 original features describing demographic, clinical and lifestyle information collected through the BRFSS survey.
+A train-validation split (80\%-20\%) was performed using a fixed random seed in order to evaluate model performance.
 
-A train-validation split (80\%-20\%) was performed using a fixed random seed.
-The target distribution was highly imbalanced, with only approximately 8.8\% positive samples in both the training and validation sets.
+An initial analysis revealed that the dataset is highly imbalanced, with only approximately 8.8\% of individuals belonging to the positive class.
+Because of this imbalance, accuracy alone is not an appropriate evaluation metric and the F1-score was used throughout the project.
 
-Exploratory analysis highlighted several expected risk factors. Older age groups were associated with a substantially higher prevalence of cardiovascular disease.
-Similarly, variables related to hypertension, stroke history and general health showed stronger correlations with the target than lifestyle variables such as smoking or alcohol consumption.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/disease_cases.png}
+    \caption{Distribution of healthy and diseased patients in the training set. The dataset is strongly imbalanced, with only about 8.8\% positive samples.}
+    \label{fig:classdist}
+\end{figure}
+
+Figure~\ref{fig:classdist} highlights the severe class imbalance present in the dataset.
+Consequently, the learning algorithms must be able to identify a relatively small number of positive cases among a large majority of healthy individuals.
+
+To better understand the dataset, we investigated the relationship between cardiovascular disease and known risk factors.
+Age and sex are widely recognized predictors of cardiovascular risk and were therefore examined during the exploratory analysis.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{images/age_and_gender_distribution.png}
+    \caption{Relationship between cardiovascular disease, age and gender. Older age groups exhibit a substantially higher disease prevalence.}
+    \label{fig:agegender}
+\end{figure}
+
+As shown in Figure~\ref{fig:agegender}, cardiovascular disease becomes more prevalent in older age groups.
+This observation is consistent with established medical knowledge and provides evidence that the dataset contains meaningful predictive information.
 
 \section{Data Preprocessing}
 
@@ -40,59 +64,66 @@ Because one-hot encoding considerably increased the dimensionality of the data, 
 
 \section{Feature Selection}
 
-To reduce computational cost and remove redundant variables, we used an L1-regularized logistic regression model as a feature selection method.
+After one-hot encoding, the number of features increased substantially, resulting in a very high-dimensional representation of the dataset.
+Furthermore, a correlation analysis revealed the presence of numerous highly correlated variables, indicating a significant amount of redundant information.
 
-The objective of this step was not to maximize predictive performance but to identify informative variables. Features with coefficients whose absolute value was close to zero were discarded, while the remaining features were retained for subsequent experiments.
+To reduce dimensionality and improve computational efficiency, we performed feature selection using an L1-regularized logistic regression model.
+The sparsity-inducing L1 penalty drives many coefficients toward zero, making it possible to identify the most informative variables.
 
-This procedure reduced the final representation to approximately 418 features, including the intercept term.
+The objective of this step was not to maximize predictive performance but rather to construct a compact subset of features for subsequent models.
+Features associated with near-zero coefficients were discarded, while the remaining variables were retained.
+
+This procedure reduced the feature space to approximately 418 selected features, including the intercept term.
+The resulting representation was used for all subsequent classification experiments.
 
 \section{Models}
 
-\subsection{Logistic Regression}
+Our modelling strategy followed an iterative approach.
 
-Our main model was logistic regression optimized using batch gradient descent.
-The model outputs class probabilities and a classification threshold was selected on the validation set by maximizing the F1-score.
+As an initial baseline, we implemented a linear Support Vector Machine (SVM).
+The objective was to assess whether a linear classifier could extract useful information from the high-dimensional feature space obtained after preprocessing.
 
-Because the dataset is strongly imbalanced, the F1-score was preferred over accuracy as the primary evaluation metric.
+The severe class imbalance of the dataset motivated the use of logistic regression, which provides probabilistic outputs and allows the decision threshold to be optimized according to the evaluation metric.
 
-\subsection{Weighted Logistic Regression}
+Feature selection was performed through L1-regularized logistic regression.
+The selected features were subsequently used to train a standard logistic regression model.
 
-To account for class imbalance, we also implemented a weighted logistic regression assigning larger weights to positive examples during training.
-An additional L2 regularization term was applied to improve stability.
-
-\subsection{Linear Support Vector Machine}
-
-Finally, we experimented with a linear Support Vector Machine trained through coordinate descent in the dual formulation. This model was included as an alternative linear classifier and compared against logistic regression.
+Finally, we investigated a weighted logistic regression approach, where larger weights were assigned to positive samples in order to compensate for the low prevalence of cardiovascular disease cases.
 
 \section{Results}
 
-Table~\ref{tab:results} summarizes the performance obtained on the validation set.
+The primary challenge of this project was the strong class imbalance of the dataset, with positive samples representing less than 10\% of the observations.
+This characteristic had a significant impact on model selection and performance.
 
-\begin{table}[h]
+The initial linear SVM baseline struggled to correctly identify positive cases and tended to favor the majority class. We therefore shifted our focus to probabilistic models based on logistic regression.
+
+After applying one-hot encoding, median imputation, feature standardization and L1-based feature selection, logistic regression achieved the best overall performance.
+The decision threshold was tuned on the validation set using the F1-score, which was considered more appropriate than accuracy due to the class imbalance.
+
+To further address the imbalance issue, we implemented a weighted logistic regression assigning larger weights to positive samples during training.
+While this modification increased the influence of minority examples, it did not translate into an improvement in validation performance.
+
+Table~\ref{tab:results} summarizes the final results obtained by the different approaches.
+
+\begin{table}[t]
     \centering
     \begin{tabular}{lc}
-        \hline
-        Model & F1-score \\
-        \hline
+        \toprule
+        Model & Validation F1-score \\
+        \midrule
         Logistic Regression & 0.432 \\
         Weighted Logistic Regression & 0.424 \\
         Linear SVM & 0.358 \\
-        \hline
+        \bottomrule
     \end{tabular}
-    \caption{Validation performance of the tested models.}
+    \caption{Validation performance of the evaluated models.}
     \label{tab:results}
 \end{table}
 
-The standard logistic regression achieved the best overall performance.
-Although class weighting improved the importance assigned to minority-class samples, it did not lead to a higher validation F1-score.
-The linear SVM struggled with the highly imbalanced nature of the problem and tended to predict almost exclusively the majority class.
+\section{Conclusions}
 
-\section{Conclusion}
-
-In this project we developed a complete machine learning pipeline for predicting cardiovascular disease risk.
-The most important improvements came from careful preprocessing, one-hot encoding of categorical variables and feature selection using L1 regularization.
-
-Among the evaluated models, logistic regression provided the best trade-off between predictive performance and computational efficiency, achieving a validation F1-score of approximately 0.43.
-Future improvements could include more advanced feature engineering, systematic hyperparameter optimization and cross-validation-based model selection.
+Standard logistic regression achieved the highest validation F1-score, outperforming both the weighted version and the linear SVM.
+These results suggest that the improvements provided by preprocessing and feature selection were more important than additional class reweighting.
+Consequently, logistic regression was selected as the final model for the generation of test predictions.
 
 \end{document}
